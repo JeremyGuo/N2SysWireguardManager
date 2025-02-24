@@ -136,5 +136,6 @@ if __name__ == "__main__":
                 status = register_service(server_url, args.role)
             if not status:
                 logger.error("注册失败，退出")
+            time.sleep(1)
         else:
             time.sleep(args.interval)
