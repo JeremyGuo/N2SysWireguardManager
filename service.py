@@ -36,7 +36,7 @@ def register_service(server_url, role, endpoint=None):
         payload["endpoint"] = endpoint
     try:
         logger.info(f"向 {server_url}/register 发送注册请求: {payload}")
-        response = requests.post(f"{server_url}/register", json=payload, timeout=5)
+        response = requests.post(f"{server_url}/register", json=payload, timeout=5, verify=False)
         if response.status_code == 200:
             logger.info(f"注册成功，分配 IP: {assigned_ip}")
             return True
@@ -59,7 +59,7 @@ def fetch_and_update_config(server_url, interface):
             "key": key
         }
         logger.info(f"请求同步配置: {params}")
-        response = requests.get(f"{server_url}/sync", params=params, timeout=5)
+        response = requests.get(f"{server_url}/sync", params=params, timeout=5, verify=False)
         if response.status_code == 200:
             data = response.json()
             config = data.get("config")
