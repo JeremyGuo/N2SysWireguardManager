@@ -113,7 +113,6 @@ if __name__ == "__main__":
     if role == "slave":
         # 启动一个线程，每10秒钟发起一次ping
         def ping_thread():
-            nonlocal args
             while True:
                 subprocess.run(["ping", "-c", "1", args.server], check=True)
                 subprocess.run(["ping", "-c", "1", args.endpoint], check=True)

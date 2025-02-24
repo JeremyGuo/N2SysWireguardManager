@@ -1,8 +1,6 @@
 import argparse
 import subprocess
 
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WireGuard 配置管理 Service（长驻同步模式）")
     parser.add_argument("--server", type=str, required=True, help="Server 地址，例如 server.n2sys.com")
