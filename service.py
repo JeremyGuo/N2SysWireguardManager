@@ -113,15 +113,15 @@ if __name__ == "__main__":
         # 启动一个线程，每10秒钟发起一次ping
         def ping_thread():
             while True:
-                subprocess.run(["ping", "-c", "1", args.server], check=True)
-                subprocess.run(["ping", "-c", "1", args.endpoint], check=True)
+                subprocess.run(["ping", "-c", "1", args.server], check=False)
+                subprocess.run(["ping", "-c", "1", args.endpoint], check=False)
                 time.sleep(10)
         
         import threading
         ping_t = threading.Thread(target=ping_thread)
         pint_t.start()
 
-    subprocess.run(["systemctl", "restart", f"wg-quick@{args.interface}"], check=True)
+    subprocess.run(["systemctl", "restart", f"wg-quick@{args.interface}"], check=False)
     # 进入持续同步循环
     while True:
         fetch_and_update_config(server_url, args.interface)
