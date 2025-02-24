@@ -29,6 +29,7 @@ if __name__ == "__main__":
     with open("n2sys_wg.service", "r") as f:
         service_template = f.read()
     service_template = service_template.replace("@A", exec_cmd)
+    service_template = service_template.replace("@B", cur_workdir)
 
     #Write to /etc/systemd/system/n2sys_wg.service
     with open("/etc/systemd/system/n2sys_wg.service", "w") as f:

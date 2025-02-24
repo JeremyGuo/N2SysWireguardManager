@@ -9,7 +9,7 @@ User=root
 ExecStart=@A
 Restart=always
 RestartSec=5
-WorkingDirectory=/home/guojunyi/N2SysWireguardManager/
+WorkingDirectory=@B
 
 [Install]
 WantedBy=multi-user.target
