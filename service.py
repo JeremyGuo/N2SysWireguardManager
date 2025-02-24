@@ -46,7 +46,7 @@ def register_service(server_url, role, endpoint=None):
         logger.error(f"发送注册请求时发生错误：{e}")
         return False
 
-def fetch_and_update_config(server_url, interface):
+def fetch_and_update_config(server_url, role, interface):
     """
     从 server 获取最新配置内容，并写入本地配置文件，然后重启对应的 WireGuard 服务
     """
@@ -55,6 +55,7 @@ def fetch_and_update_config(server_url, interface):
     try:
         params = {
             "uid": hostname,
+            "role": role,
             "key": key
         }
         logger.info(f"请求同步配置: {params}")
@@ -124,5 +125,5 @@ if __name__ == "__main__":
     subprocess.run(["systemctl", "restart", f"wg-quick@{args.interface}"], check=False)
     # 进入持续同步循环
     while True:
-        fetch_and_update_config(server_url, args.interface)
+        fetch_and_update_config(server_url, args.role, args.interface)
         time.sleep(args.interval)
