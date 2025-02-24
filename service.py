@@ -38,7 +38,6 @@ def register_service(server_url, role, endpoint=None):
         logger.info(f"向 {server_url}/register 发送注册请求: {payload}")
         response = requests.post(f"{server_url}/register", json=payload, timeout=5, verify=False)
         if response.status_code == 200:
-            logger.info(f"注册成功，分配 IP: {assigned_ip}")
             return True
         else:
             logger.error(f"注册失败，返回：{response.status_code} - {response.text}")
