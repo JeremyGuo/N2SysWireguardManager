@@ -109,7 +109,7 @@ if __name__ == "__main__":
         logger.error("注册失败，退出")
         exit(1)
     
-    if role == "slave":
+    if args.role == "slave":
         # 启动一个线程，每10秒钟发起一次ping
         def ping_thread():
             while True:
