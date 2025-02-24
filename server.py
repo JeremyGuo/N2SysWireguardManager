@@ -136,6 +136,7 @@ def sync():
         config_lines.append(f"PrivateKey = {master_info.get('private_key')}")
         config_lines.append(f"MTU = 1420")
         config_lines.append(f"Address = {master_info.get('ip')}")
+        config_lines.append(f"ListenPort = {master_info.get('endpoint').split(':')[-1]}")
         config_lines.append("")
         for slave in slave_infos:
             config_lines.append("[Peer]")
