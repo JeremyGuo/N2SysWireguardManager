@@ -1,6 +1,11 @@
 # Prerequisites
 *.d
 
+key
+server.log
+
+__pycache__
+
 # Compiled Object files
 *.slo
 *.lo
