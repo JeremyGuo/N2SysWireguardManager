@@ -143,7 +143,7 @@ def sync():
             config_lines.append(f"PublicKey = {slave.get('public_key')}")
             # master 不直接访问 slave，不设置 Endpoint，但可备注 keepalive 配置
             config_lines.append(f"{persistent_keepalive}")
-            config_lines.append(f"AllowedIPs = 10.11.12.0/24")
+            config_lines.append(f"AllowedIPs = {slave.get('ip')}/32")
             config_lines.append("")
     elif role == "slave":
         # 查找该 slave 信息
