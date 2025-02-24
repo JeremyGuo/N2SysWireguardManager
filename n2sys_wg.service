@@ -5,7 +5,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=guojunyi
+User=root
 ExecStart=@A
 Restart=always
 RestartSec=5
