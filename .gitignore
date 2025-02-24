@@ -3,6 +3,7 @@
 
 key
 server.log
+service.log
 
 __pycache__
 
