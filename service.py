@@ -122,7 +122,7 @@ if __name__ == "__main__":
         
         import threading
         ping_t = threading.Thread(target=ping_thread)
-        pint_t.start()
+        ping_t.start()
 
     subprocess.run(["systemctl", "restart", f"wg-quick@{args.interface}"], check=False)
     # 进入持续同步循环
