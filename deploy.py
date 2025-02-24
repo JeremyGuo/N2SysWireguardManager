@@ -3,7 +3,7 @@ import subprocess
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WireGuard 配置管理 Service（长驻同步模式）")
-    parser.add_argument("--server", type=str, required=True, help="Server 地址，例如 server.n2sys.com")
+    parser.add_argument("--server", type=str, required=True, help="Server 地址")
     parser.add_argument("--port", type=int, default=8088, help="Server 端口，默认为 8088")
     parser.add_argument("--role", type=str, choices=["master", "slave"], required=True, help="服务角色：master 或 slave")
     parser.add_argument("--interface", type=str, default="n2sys_tunnel_wg", help="WireGuard 接口名称，默认为 n2sys_tunnel_wg")
