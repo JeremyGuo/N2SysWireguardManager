@@ -24,7 +24,7 @@ fh = logging.FileHandler('service.log')
 fh.setLevel(logging.INFO)
 logger.addHandler(fh)
 
-def register_service(server_url, role, interface):
+def register_service(server_url, role, endpoint=None):
     global key
     hostname = subprocess.run(["hostname"], capture_output=True, text=True).stdout.strip()
     payload = {
@@ -32,15 +32,20 @@ def register_service(server_url, role, interface):
         "uid": hostname,
         "key": key
     }
+    if role == "master":
+        payload["endpoint"] = endpoint
     try:
         logger.info(f"向 {server_url}/register 发送注册请求: {payload}")
         response = requests.post(f"{server_url}/register", json=payload, timeout=5)
         if response.status_code == 200:
             logger.info(f"注册成功，分配 IP: {assigned_ip}")
+            return True
         else:
             logger.error(f"注册失败，返回：{response.status_code} - {response.text}")
+            return False
     except Exception as e:
         logger.error(f"发送注册请求时发生错误：{e}")
+        return False
 
 def fetch_and_update_config(server_url, interface):
     """
@@ -84,18 +89,24 @@ def fetch_and_update_config(server_url, interface):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WireGuard 配置管理 Service（长驻同步模式）")
-    parser.add_argument("--server", type=str, required=True, help="Server 地址，例如 server.n2sys.com")
+    parser.add_argument("--server", type=str, required=True, help="Server 地址")
     parser.add_argument("--port", type=int, default=8088, help="Server 端口，默认为 8088")
     parser.add_argument("--role", type=str, choices=["master", "slave"], required=True, help="服务角色：master 或 slave")
     parser.add_argument("--interface", type=str, default="n2sys_tunnel_wg", help="WireGuard 接口名称，默认为 n2sys_tunnel_wg")
     parser.add_argument("--interval", type=int, default=60, help="同步间隔（秒），默认为 60s")
+    parser.add_argument("--endpoint", type=str, help="master 服务的 endpoint")
+    parser.add_argument("--endpoint-port", type=int, help="master 服务的 endpoint 端口，默认为 51820")
     args = parser.parse_args()
 
     server_url = f"https://{args.server}:{args.port}"
 
     # 注册并获取 server 分配的 public_key
-    pub_key = register_service(server_url, args.role, args.interface)
-    if not pub_key:
+    status = False
+    if args.role == "master":
+        status = register_service(server_url, args.role, f"{args.endpoint}:{args.endpoint_port}")
+    else:
+        status = register_service(server_url, args.role)
+    if not status:
         logger.error("注册失败，退出")
         exit(1)
     
@@ -105,6 +116,7 @@ if __name__ == "__main__":
             nonlocal args
             while True:
                 subprocess.run(["ping", "-c", "1", args.server], check=True)
+                subprocess.run(["ping", "-c", "1", args.endpoint], check=True)
                 time.sleep(10)
         
         import threading
