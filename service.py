@@ -121,7 +121,7 @@ if __name__ == "__main__":
         ping_t = threading.Thread(target=ping_thread)
         pint_t.start()
 
-
+    subprocess.run(["systemctl", "restart", f"wg-quick@{args.interface}"], check=True)
     # 进入持续同步循环
     while True:
         fetch_and_update_config(server_url, args.interface)
