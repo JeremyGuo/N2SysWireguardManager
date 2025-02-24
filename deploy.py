@@ -25,7 +25,7 @@ if __name__ == "__main__":
         exec_cmd += " --endpoint-port " + str(args.endpoint_port)
     
     #Read template n2sys_wg.service
-    service_template
+    service_template = None
     with open("n2sys_wg.service", "r") as f:
         service_template = f.read()
     service_template.replace("@A", exec_cmd)
