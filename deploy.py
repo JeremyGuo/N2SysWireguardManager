@@ -1,5 +1,6 @@
 import argparse
 import subprocess
+import os
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WireGuard 配置管理 Service（长驻同步模式）")
