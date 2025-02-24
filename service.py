@@ -82,8 +82,10 @@ def fetch_and_update_config(server_url, role, interface):
                     logger.info("配置未发生变化")
             else:
                 logger.error("返回数据中未包含配置内容")
+            return True
         else:
             logger.error(f"同步配置失败，返回：{response.status_code} - {response.text}")
+            return False
     except Exception as e:
         logger.error(f"获取或更新配置时发生错误：{e}")
 
@@ -125,5 +127,13 @@ if __name__ == "__main__":
     subprocess.run(["systemctl", "restart", f"wg-quick@{args.interface}"], check=False)
     # 进入持续同步循环
     while True:
-        fetch_and_update_config(server_url, args.role, args.interface)
+        if not fetch_and_update_config(server_url, args.role, args.interface):
+            logger.error("Server配置错误，重新注册")
+            # Make re-register
+            if args.role == "master":
+                status = register_service(server_url, args.role, f"{args.endpoint}:{args.endpoint_port}")
+            else:
+                status = register_service(server_url, args.role)
+            if not status:
+                logger.error("注册失败，退出")
         time.sleep(args.interval)
