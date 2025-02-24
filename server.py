@@ -49,17 +49,6 @@ def generate_keypair():
 @app.route("/register", methods=["POST"])
 def register():
     """
-    接收 service 的注册请求，JSON 数据格式示例：
-      master：
-        {
-          "role": "master",
-          "interface": "wg0"   # 可选，默认为 wg0
-        }
-      slave：
-        {
-          "role": "slave",
-          "interface": "wg1"   # 可选，默认为 wg0
-        }
     注意：server 会为每个注册的 service 分配唯一的 IP 地址，
     并调用 wg genkey/wg pubkey 生成密钥对，将生成的 PrivateKey 和 PublicKey 返回给 service。
     """
@@ -69,9 +58,10 @@ def register():
         return jsonify({"error": "注册数据不完整"}), 400
     if not "key" in data or data["key"] != key:
         return jsonify({"error": "Key 不匹配"}), 403
+    if not "uid" in data:
+        return jsonify({"error": "uid 未提供"}), 400
 
     role = data["role"]
-    data.setdefault("interface", "wg0")
     # 生成密钥对
     private_key, public_key = generate_keypair()
     if not private_key or not public_key:
@@ -82,6 +72,8 @@ def register():
 
     if role == "master":
         # master 固定分配 MASTER_IP
+        if not "endpoint" in data:
+            return jsonify({"error": "master 未提供 endpoint"}), 400
         data["ip"] = MASTER_IP
         master_info = data
         logger.info(f"注册 master：{master_info}")
@@ -89,7 +81,7 @@ def register():
         # 检查是否已存在该 slave，若存在则更新；否则分配新 IP
         exists = False
         for i, s in enumerate(slave_infos):
-            if s.get("interface") == data.get("interface"):
+            if s.get("uid") == data.get("uid"):
                 exists = True
                 # 保持原有 IP，不重复分配
                 data["ip"] = s.get("ip")
@@ -123,10 +115,9 @@ def sync():
       - Interface 部分写入 PrivateKey（直接写入，不作为注释）
       - Peer 部分包含 PersistentKeepAlive 配置（示例值为 25）
     """
-    role = request.args.get("role")
-    public_key = request.args.get("public_key")
-    interface = request.args.get("interface", "wg0")
     global key
+    role = request.args.get("role")
+    uid = request.args.get("uid")
     arg_key = request.args.get("key")
 
     if role not in ("master", "slave"):
@@ -138,7 +129,7 @@ def sync():
     persistent_keepalive = "PersistentKeepAlive = 25"
 
     if role == "master":
-        if master_info is None or master_info.get("public_key") != public_key:
+        if master_info is None:
             return jsonify({"error": "master not match or registered"}), 400
         # 构造 master 配置，包含自己的 PrivateKey 与所有 slave 的 Peer 信息
         config_lines.append("[Interface]")
@@ -157,7 +148,7 @@ def sync():
         # 查找该 slave 信息
         target = None
         for slave in slave_infos:
-            if slave.get("public_key") == public_key and slave.get("interface", "wg0") == interface:
+            if slave.get("uid") == uid:
                 target = slave
                 break
         if target is None:
@@ -172,7 +163,7 @@ def sync():
         if master_info:
             config_lines.append("[Peer]")
             config_lines.append(f"PublicKey = {master_info.get('public_key')}")
-            config_lines.append(f"Endpoint = {master_info.get('ip')}")
+            config_lines.append(f"Endpoint = {master_info.get('endpoint')}")
             config_lines.append(f"AllowedIPs = 10.11.12.0/24")
             config_lines.append(f"{persistent_keepalive}")
             config_lines.append("")
